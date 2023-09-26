@@ -14,11 +14,11 @@
         <StackPanel>
             <MenuBar>
                 <MenuBarItem Title="File">
-                    <MenuFlyoutItem x:ConnectionId='34' Text="Open"                       />
-                    <MenuFlyoutItem x:ConnectionId='35' Text="Save"                       />
+                    <MenuFlyoutItem x:ConnectionId='36' Text="Open"                       />
+                    <MenuFlyoutItem x:ConnectionId='37' Text="Save"                       />
                     <MenuFlyoutItem Text="SaveAs"/>
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem x:ConnectionId='36' Text="Close"                        />
+                    <MenuFlyoutItem x:ConnectionId='38' Text="Close"                        />
                     <MenuFlyoutSeparator />
                     <MenuFlyoutSubItem Text="Recent Files">
                         <MenuFlyoutItem Text="ReadMe.txt"/>
@@ -32,7 +32,7 @@
                     <MenuFlyoutItem Text="Paste"/>
                 </MenuBarItem>
                 <MenuBarItem Title="View">
-                    <MenuFlyoutItem x:ConnectionId='33' Text="Settings"                       />
+                    <MenuFlyoutItem x:ConnectionId='35' Text="Settings"                       />
                 </MenuBarItem>
             </MenuBar>
         </StackPanel>
@@ -83,9 +83,14 @@
             </DropDownButton>
             <DropDownButton x:ConnectionId='32' x:Name="btnFillColor"                            Width="60" Height="36" ToolTipService.ToolTip="Fill Color" Style="{StaticResource ToolbarButtonStyle}">
                 <DropDownButton.Content>
-                    <TextBlock Text=""/><!--<Image x:Name="image2" Source="/Assets/iconFillColor.png" Margin="0,0,0,0"/>-->
+                    <TextBlock Text=""/>
                 </DropDownButton.Content>
             </DropDownButton>
+            <Button x:ConnectionId='33' x:Name="btnMultiSelect"                              Width="60" Height="36" ToolTipService.ToolTip="Multi-select" Style="{StaticResource ToolbarButtonStyle}">
+                <Button.Content>
+                    <Image x:ConnectionId='34' x:Name="image2" Source="/Assets/iconMultiSelect.png" Margin="0,0,0,0"/>
+                </Button.Content>
+            </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <StackPanel Background="LightGray" Orientation="Vertical" MinWidth="530">
@@ -93,7 +98,9 @@
                                                                
                                                              
                                                              
-                                                               >
+                                                               
+                                                
+                                            >
 
                     <Canvas.ContextFlyout>
                         <MenuFlyout x:ConnectionId='20' x:Name="contextMenu1">

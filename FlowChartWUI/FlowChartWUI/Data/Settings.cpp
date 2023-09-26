@@ -70,13 +70,111 @@ namespace FlowChart
 			return 0;
 		}
 
-		winrt::hstring Settings::GetJSON()
+		winrt::hstring Settings::WriteJSON(std::vector<ISymbol*> symbols)
 		{
-			winrt::hstring result = L"BEGIN\r\n{\r\n\r\n";
+			std::string result = "";
 
-			result = result + L"\r\n\r\n}";
+			try
+			{
+				json j;
 
-			return result;
+				for (ISymbol* symbol : symbols)
+				{
+					json s;
+					s["Type"] = winrt::to_string(symbol->GetTypeString());
+					s["Name"] = winrt::to_string(symbol->getName());
+					s["Caption"] = winrt::to_string(symbol->getCaption());
+					s["IsSelected"] = symbol->getIsSelected();
+					winrt::Windows::Foundation::Point position = symbol->GetPosition();
+					s["Position"] = std::to_string((int)position.X) + "," + std::to_string((int)position.Y);
+					j.push_back(s);
+				}
+
+				for (Link* link : Links)
+				{
+					json s;
+					s["Type"] = "Link";
+					s["InputAnchorIndex"] = link->InputAnchorIndex;
+					s["OutputAnchorIndex"] = link->OutputAnchorIndex;
+					s["Stroke"] = (int)link->Stroke;
+					s["StrokeSize"] = link->StrokeSize;
+					s["IsSelected"] = link->IsSelected;
+					s["ParentSymbol"] = winrt::to_string(link->ParentSymbol->getName());
+					s["NextSymbol"] = winrt::to_string(link->NextSymbol->getName());
+					j.push_back(s);
+				}
+
+				result = j.dump();
+			}
+			catch (...)
+			{
+
+			}
+
+			return winrt::to_hstring(result);
+		}
+
+		std::vector<ISymbol*> Settings::ReadJSON(const winrt::hstring& text)
+		{
+			std::vector<ISymbol*> symbols;
+
+			try
+			{
+				if (Settings::ChartSymbols.empty())
+				{
+					Settings::InitializeSymbols();
+				}
+
+				json j = json::parse(winrt::to_string(text));
+
+				if (j.is_array())
+				{
+					for (const auto& s : j)
+					{
+						winrt::hstring strType = winrt::to_hstring(s["Type"]);
+
+						if (strType == L"Link")
+						{
+							FlowChart::Data::Link* link = new FlowChart::Data::Link();
+							link->InputAnchorIndex = s["InputAnchorIndex"];
+							link->OutputAnchorIndex = s["OutputAnchorIndex"];
+							link->Stroke = (StrokeStyle)s["Stroke"];
+							link->StrokeSize = s["StrokeSize"];
+							link->IsSelected = s["IsSelected"];
+							link->ParentSymbol = GetSymbol(symbols, winrt::to_hstring(s["ParentSymbol"]));
+							link->NextSymbol = GetSymbol(symbols, winrt::to_hstring(s["NextSymbol"]));
+							Links.push_back(link);
+						}
+						else
+						{
+							for (ISymbolChart* cmd : Settings::ChartSymbols)
+							{
+								if (strType == cmd->GetTypeString())
+								{
+									ISymbolChart* symbol = cmd->GetDuplicate();
+									symbol->setName(winrt::to_hstring(s["Name"]));
+									symbol->setCaption(winrt::to_hstring(s["Caption"]));
+									symbol->setIsSelected(s["IsSelected"]);
+									winrt::hstring strPos = winrt::to_hstring(s["Position"]);
+									std::vector<winrt::hstring> pos = Utility::Split(strPos, L",");
+									if (pos.size() >= 2)
+									{
+										symbol->SetPosition(std::stof(winrt::to_string(pos[0])), std::stof(winrt::to_string(pos[1])));
+									}
+									symbols.push_back(symbol);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (...)
+			{
+
+			}
+
+			return symbols;
 		}
 
 		void Settings::DrawInputAnchors(Canvas canvas, ISymbol* symbol)
@@ -148,6 +246,18 @@ namespace FlowChart
 					canvas.Children().Append(path);
 				}
 			}
+		}
+
+		ISymbol* Settings::GetSymbol(std::vector<ISymbol*> symbols, winrt::hstring name)
+		{
+			for (size_t i = 0; i < symbols.size(); i++)
+			{
+				if (symbols[i]->getName() == name)
+				{
+					return symbols[i];
+				}
+			}
+			return nullptr;
 		}
 
 		winrt::hstring Settings::Display(const winrt::hstring& text, int maxlenght)

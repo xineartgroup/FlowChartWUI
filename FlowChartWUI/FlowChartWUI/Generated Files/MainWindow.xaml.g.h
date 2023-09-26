@@ -277,6 +277,24 @@ namespace winrt::FlowChartWUI::implementation
         {
             _btnFillColor = value;
         }
+
+        ::winrt::Microsoft::UI::Xaml::Controls::Button btnMultiSelect()
+        {
+            return _btnMultiSelect;
+        }
+        void btnMultiSelect(::winrt::Microsoft::UI::Xaml::Controls::Button value)
+        {
+            _btnMultiSelect = value;
+        }
+
+        ::winrt::Microsoft::UI::Xaml::Controls::Image image2()
+        {
+            return _image2;
+        }
+        void image2(::winrt::Microsoft::UI::Xaml::Controls::Image value)
+        {
+            _image2 = value;
+        }
         
     protected:
         bool _contentLoaded{false};
@@ -312,6 +330,8 @@ namespace winrt::FlowChartWUI::implementation
         ::winrt::Microsoft::UI::Xaml::Controls::DropDownButton _btnFontColor{nullptr};
         ::winrt::Microsoft::UI::Xaml::Controls::DropDownButton _btnLineColor{nullptr};
         ::winrt::Microsoft::UI::Xaml::Controls::DropDownButton _btnFillColor{nullptr};
+        ::winrt::Microsoft::UI::Xaml::Controls::Button _btnMultiSelect{nullptr};
+        ::winrt::Microsoft::UI::Xaml::Controls::Image _image2{nullptr};
     };
 }
 

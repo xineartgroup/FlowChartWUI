@@ -16,16 +16,17 @@ namespace FlowChart
 	{
 		class DiagramClassSymbols
 		{
+		private:
+			std::vector<ISymbolClass*> symbols;
+
 		public:
 			DiagramClassSymbols();
-
-			std::vector<ISymbolClass*> Symbols;
 
 			void Draw(Canvas canvas);
 
 			void SetHoverItem();
 
-			PointerHit *SelectHit();
+			PointerHit SelectHit(bool multi);
 
 			void Link();
 
@@ -40,8 +41,6 @@ namespace FlowChart
 			void DeleteSelectedLink();
 
 			void ClearSymbols();
-
-			void ReadJSON(const winrt::hstring &text);
 
 			void AddAttribute();
 

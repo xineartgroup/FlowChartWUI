@@ -24,6 +24,7 @@ namespace winrt::FlowChartWUI::implementation
     {
     private:
         const int _ROWS = 16;
+        bool multipleSelection = false;
         bool forceMouseCapture;
         bool Dragging;
         int pageIndex;
@@ -38,6 +39,7 @@ namespace winrt::FlowChartWUI::implementation
     public:
         MainWindow();
         void InitializeComponent2();
+        std::string GetExecutablePath();
         void Form1_Load();
         void RedrawImage();
         ControlTemplate GetColorPaletteTemplate();
@@ -53,6 +55,7 @@ namespace winrt::FlowChartWUI::implementation
         void pictureBox1_MouseDown(Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void pictureBox1_MouseMove(Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void pictureBox1_MouseUp(Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
+        void canvas_KeyDown(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e);
         void deleteLinkToolStripMenuItem_Click(IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void deleteToolStripMenuItem_Click(IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void addAttributeToolStripMenuItem_Click(IInspectable const& sender, winrt::Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -67,6 +70,7 @@ namespace winrt::FlowChartWUI::implementation
         void btnLineColor_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void btnFillColor_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void btnFontColor_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void btnMultiSelect_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& e);
         void btnFont_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void btnFontBold_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void btnFontItalic_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
@@ -84,6 +88,7 @@ namespace winrt::FlowChartWUI::implementation
         void RotateAllAnchorPoints_Click(Windows::Foundation::IInspectable const& sender, Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void cboLinkPropertyStroke_SelectionChanged(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args);
         void txtLinkPropertySize_TextChanged(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Controls::TextChangedEventArgs const& args);
+        void canvas_KeyUp(winrt::Windows::Foundation::IInspectable const& sender, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e);
     };
 }
 

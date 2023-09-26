@@ -83,9 +83,14 @@
             </DropDownButton>
             <DropDownButton x:Name="btnFillColor" Click="btnFillColor_Click" Width="60" Height="36" ToolTipService.ToolTip="Fill Color" Style="{StaticResource ToolbarButtonStyle}">
                 <DropDownButton.Content>
-                    <TextBlock Text=""/><!--<Image x:Name="image2" Source="/Assets/iconFillColor.png" Margin="0,0,0,0"/>-->
+                    <TextBlock Text=""/>
                 </DropDownButton.Content>
             </DropDownButton>
+            <Button x:Name="btnMultiSelect" Click="btnMultiSelect_Click" Width="60" Height="36" ToolTipService.ToolTip="Multi-select" Style="{StaticResource ToolbarButtonStyle}">
+                <Button.Content>
+                    <Image x:Name="image2" Source="/Assets/iconMultiSelect.png" Margin="0,0,0,0"/>
+                </Button.Content>
+            </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
             <StackPanel Background="LightGray" Orientation="Vertical" MinWidth="530">
@@ -93,7 +98,9 @@
                         PointerPressed="pictureBox1_MouseDown" 
                         PointerMoved="pictureBox1_MouseMove" 
                         PointerReleased="pictureBox1_MouseUp"
-                        DoubleTapped="pictureBox1_DoubleTapped">
+                        DoubleTapped="pictureBox1_DoubleTapped"
+                        KeyDown="canvas_KeyDown"
+                        KeyUp="canvas_KeyUp">
 
                     <Canvas.ContextFlyout>
                         <MenuFlyout x:Name="contextMenu1">

@@ -90,7 +90,7 @@ namespace FlowChart
 						}
 					}
 
-					AnchorPoint* anchorPoint1 = NextSymbol->GetInputAnchorPoint(InputAnchorIndex < 0 ? defaultIndex : InputAnchorIndex);
+					AnchorPoint* anchorPoint1 = NextSymbol->GetInputAnchorPoint(InputAnchorIndex < 0 ? (int)defaultIndex : InputAnchorIndex);
 
 					if (anchorPoint1)
 					{
@@ -472,7 +472,7 @@ namespace FlowChart
 					}
 				}
 
-				AnchorPoint* anchorPoint1 = NextSymbol->GetInputAnchorPoint(InputAnchorIndex < 0 ? defaultIndex : InputAnchorIndex);
+				AnchorPoint* anchorPoint1 = NextSymbol->GetInputAnchorPoint(InputAnchorIndex < 0 ? (int)defaultIndex : InputAnchorIndex);
 				AnchorPoint* anchorPoint = ParentSymbol->GetOutputAnchorPoint(OutputAnchorIndex);
 
 				if (anchorPoint && anchorPoint1)

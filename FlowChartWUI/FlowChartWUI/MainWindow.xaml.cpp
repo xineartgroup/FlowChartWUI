@@ -8,6 +8,8 @@
 #endif
 
 using namespace Windows::Foundation::Collections;
+//using namespace Windows::Foundation;
+using namespace Windows::Storage::Pickers;
 
 namespace winrt::FlowChartWUI::implementation
 {
@@ -348,6 +350,23 @@ namespace winrt::FlowChartWUI::implementation
         }
 
         Form1_Load();
+    }
+
+    std::string MainWindow::GetExecutablePath()
+    {
+        char rawPathName[MAX_PATH];
+        GetModuleFileNameA(nullptr, rawPathName, MAX_PATH);
+        std::string executableFile(rawPathName);
+
+        size_t count = executableFile.size();
+        size_t lastIndexOf = count;
+        for (size_t i = 0; i < count; i++)
+        {
+            if (executableFile[i] == '\\')
+                lastIndexOf = i + 1;
+        }
+
+        return executableFile.substr(0, lastIndexOf);
     }
 
     ControlTemplate MainWindow::GetColorPaletteTemplate()
@@ -937,12 +956,128 @@ namespace winrt::FlowChartWUI::implementation
 
     void MainWindow::OpenFile_Click(IInspectable const&, Microsoft::UI::Xaml::RoutedEventArgs const&)
     {
-        
+        FileOpenPicker picker = FileOpenPicker();
+
+        //picker.ViewMode(PickerViewMode::List);
+        //picker.FileTypeFilter().Append(L".txt");
+        picker.FileTypeFilter().Append(L".json");
+        //picker.FileTypeFilter().Append(L"*");
+        //picker.SuggestedStartLocation(PickerLocationId::ComputerFolder);
+
+        auto windowNative{ this->try_as<::IWindowNative>() };
+        winrt::check_bool(windowNative);
+        HWND hWnd{ 0 };
+        windowNative->get_WindowHandle(&hWnd);
+        picker.as<::IInitializeWithWindow>()->Initialize(hWnd);
+
+        Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> fileOp = picker.PickSingleFileAsync();
+
+        if (fileOp)
+        {
+            fileOp.Completed([this](Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> const& fileStore, Windows::Foundation::AsyncStatus const& status)
+                {
+                    if (status == Windows::Foundation::AsyncStatus::Completed)
+                    {
+                        winrt::Windows::Storage::StorageFile file = fileStore.GetResults();
+
+                        std::string fileContent = "";
+                        std::string filePath = winrt::to_string(file.Path()); //GetExecutablePath() + "file.json";
+                        std::fstream infile;
+                        infile.open(filePath);
+
+                        while (!infile.eof())
+                        {
+                            std::string data;
+                            infile >> data;
+                            fileContent = fileContent + data;
+                        }
+
+                        infile.close();
+
+                        winrt::hstring testText = winrt::to_hstring(fileContent);
+
+                        DiagramChartsymbols[pageIndex]->ClearSymbols();
+                        std::vector<ISymbol*> symbols = Settings::ReadJSON(testText);
+                        for (ISymbol* symbol : symbols)
+                        {
+                            DiagramChartsymbols[pageIndex]->AddSymbol(static_cast<ISymbolChart*>(symbol));
+                        }
+                    }
+                    else if (status == Windows::Foundation::AsyncStatus::Canceled)
+                    {
+                        //fileStore.Cancel();
+                    }
+                    else
+                    {
+                        winrt::hresult hr = fileStore.ErrorCode();
+                        MessageBox(NULL, winrt::to_hstring(std::to_string(hr.value)).c_str(), L"Error!!!", 0);
+                    }
+                });
+        }
+        else
+        {
+            MessageBox(NULL, L"Sorry...", L"Failed!!!", 0);
+        }
+
+        RedrawImage();
     }
 
     void MainWindow::SaveFile_Click(IInspectable const&, Microsoft::UI::Xaml::RoutedEventArgs const&)
     {
-        
+        FileSavePicker picker = FileSavePicker();
+
+        //picker.ViewMode(PickerViewMode::List);
+        //picker.FileTypeFilter().Append(L".txt");
+        picker.FileTypeChoices().Insert(L"JSON", winrt::single_threaded_vector<hstring>({ L".json" }));
+        picker.SuggestedFileName(L"New Flow Chart");
+        //picker.FileTypeFilter().Append(L"*");
+        //picker.SuggestedStartLocation(PickerLocationId::ComputerFolder);
+
+        auto windowNative{ this->try_as<::IWindowNative>() };
+        winrt::check_bool(windowNative);
+        HWND hWnd{ 0 };
+        windowNative->get_WindowHandle(&hWnd);
+        picker.as<::IInitializeWithWindow>()->Initialize(hWnd);
+
+        Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> fileOp = picker.PickSaveFileAsync();
+
+        if (fileOp)
+        {
+            fileOp.Completed([this](Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> const& fileStore, Windows::Foundation::AsyncStatus const& status)
+                {
+                    if (status == Windows::Foundation::AsyncStatus::Completed)
+                    {
+                        winrt::Windows::Storage::StorageFile file = fileStore.GetResults();
+
+                        std::ofstream ofile(winrt::to_string(file.Path()));//GetExecutablePath() + "file.json"
+                        //ofile.open(GetExecutablePath() + "file.json");
+                        //if (ofile.is_open())
+                        {
+                            std::vector<ISymbolChart*> charts = DiagramChartsymbols[pageIndex]->GetAllSymbols();
+                            std::vector<ISymbol*> symbols;
+                            for (ISymbolChart* chart : charts)
+                            {
+                                symbols.push_back(chart);
+                            }
+                            ofile << winrt::to_string(Settings::WriteJSON(symbols));
+                            ofile.close();
+                        }
+                    }
+                    else if (status == Windows::Foundation::AsyncStatus::Canceled)
+                    {
+                        fileStore.Cancel();
+                    }
+                    else
+                    {
+                        winrt::hresult hr = fileStore.ErrorCode();
+                        MessageBox(NULL, winrt::to_hstring(std::to_string(hr.value)).c_str(), L"Error!!!", 0);
+                    }
+                });
+        }
+        else
+        {
+            MessageBox(NULL, L"Sorry...", L"Failed!!!", 0);
+        }
     }
 
     void MainWindow::CloseFile_Click(IInspectable const&, Microsoft::UI::Xaml::RoutedEventArgs const&)
@@ -961,7 +1096,7 @@ namespace winrt::FlowChartWUI::implementation
 
         FlowChart::Data::Utility::MousePosition = winrt::Windows::Foundation::Point(point.X, point.Y);
 
-        DiagramChartsymbols[pageIndex]->SelectHit();
+        DiagramChartsymbols[pageIndex]->SelectHit(multipleSelection);
 
         FlowChart::Data::ISymbol* symbol = DiagramChartsymbols[pageIndex]->GetSelection();
         if (symbol)
@@ -980,31 +1115,27 @@ namespace winrt::FlowChartWUI::implementation
 
         canvas().ContextFlyout(contextMenu1());
 
-        FlowChart::Data::PointerHit* selectedItem = new FlowChart::Data::PointerHit();
+        FlowChart::Data::PointerHit selectedItem;
 
         if (tabDiagram().SelectedIndex() == 0)
         {
-            selectedItem = DiagramChartsymbols[pageIndex]->SelectHit();
+            selectedItem = DiagramChartsymbols[pageIndex]->SelectHit(multipleSelection);
 
-            if (selectedItem->ItemIndex >= 0)
+            if (selectedItem.ItemIndex >= 0)
             {
-                if (selectedItem->Itemtype == FlowChart::Data::ItemType::Symbol)
+                if (selectedItem.Itemtype == FlowChart::Data::ItemType::Symbol)
                 {
                     //forceMouseCapture = canvas().CapturePointer();
                     canvas().ContextFlyout(contextMenu2);
                 }
-                else if (selectedItem->Itemtype == FlowChart::Data::ItemType::Linker)
+                else if (selectedItem.Itemtype == FlowChart::Data::ItemType::Linker)
                 {
                     //forceMouseCapture = canvas().CapturePointer();
                     canvas().ContextFlyout(contextMenu4);
                 }
             }
 
-            if (FlowChart::Data::Utility::LinkingIndex >= 0)
-            {
-                Dragging = false;
-            }
-            else
+            if (FlowChart::Data::Utility::LinkingIndex < 0)
             {
                 if (FlowChart::Data::Settings::NewSymbol)
                 {
@@ -1022,30 +1153,30 @@ namespace winrt::FlowChartWUI::implementation
                     Dragging = false;
                 }
             }
+            else
+            {
+                Dragging = false;
+            }
         }
         else if (tabDiagram().SelectedIndex() == 1)
         {
-            selectedItem = DiagramClasssymbols[pageIndex]->SelectHit();
+            selectedItem = DiagramClasssymbols[pageIndex]->SelectHit(multipleSelection);
 
-            if (selectedItem->ItemIndex >= 0)
+            if (selectedItem.ItemIndex >= 0)
             {
-                if (selectedItem->Itemtype == FlowChart::Data::ItemType::Symbol)
+                if (selectedItem.Itemtype == FlowChart::Data::ItemType::Symbol)
                 {
                     //forceMouseCapture = canvas().CapturePointer();
                     canvas().ContextFlyout(contextMenu3);
                 }
-                else if (selectedItem->Itemtype == FlowChart::Data::ItemType::Linker)
+                else if (selectedItem.Itemtype == FlowChart::Data::ItemType::Linker)
                 {
                     //forceMouseCapture = canvas().CapturePointer();
                     canvas().ContextFlyout(contextMenu4);
                 }
             }
 
-            if (FlowChart::Data::Utility::LinkingIndex >= 0)
-            {
-                Dragging = false;
-            }
-            else
+            if (FlowChart::Data::Utility::LinkingIndex < 0)
             {
                 if (FlowChart::Data::Settings::NewSymbol)
                 {
@@ -1063,7 +1194,13 @@ namespace winrt::FlowChartWUI::implementation
                     Dragging = false;
                 }
             }
+            else
+            {
+                Dragging = false;
+            }
         }
+
+        canvas().Focus(FocusState::Keyboard);
     }
 
     void MainWindow::pictureBox1_MouseMove(IInspectable const&, winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
@@ -1126,6 +1263,22 @@ namespace winrt::FlowChartWUI::implementation
         Dragging = false;
 
         RedrawImage();
+    }
+
+    void MainWindow::canvas_KeyDown(IInspectable const&, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e)
+    {
+        if (e.Key() == winrt::Windows::System::VirtualKey::LeftControl)
+        {
+            multipleSelection = true;
+        }
+    }
+
+    void winrt::FlowChartWUI::implementation::MainWindow::canvas_KeyUp(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& e)
+    {
+        if (e.Key() == winrt::Windows::System::VirtualKey::LeftControl)
+        {
+            multipleSelection = false;
+        }
     }
 
     void MainWindow::deleteLinkToolStripMenuItem_Click(IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&)
@@ -1386,6 +1539,11 @@ namespace winrt::FlowChartWUI::implementation
             }
             RedrawImage();
         }
+    }
+
+    void MainWindow::btnMultiSelect_Click(IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&)
+    {
+        multipleSelection = !multipleSelection;
     }
 
     void MainWindow::btnFont_Click(IInspectable const&, Microsoft::UI::Xaml::RoutedEventArgs const&)
@@ -1667,7 +1825,7 @@ namespace winrt::FlowChartWUI::implementation
         {
             if (Settings::Links[i]->IsSelected)
             {
-                Settings::Links[i]->StrokeSize = std::atoi(winrt::to_string(txtLinkPropertySize().Text()).c_str());
+                Settings::Links[i]->StrokeSize = (float)std::atoi(winrt::to_string(txtLinkPropertySize().Text()).c_str());
                 RedrawImage();
                 break;
             }

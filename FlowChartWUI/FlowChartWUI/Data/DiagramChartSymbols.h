@@ -15,14 +15,15 @@ namespace FlowChart
 	{
 		class DiagramChartSymbols
 		{
-		public:
-			std::vector<ISymbolChart*> Symbols;
+		private:
+			std::vector<ISymbolChart*> symbols;
 
+		public:
 			void Draw(Canvas canvas);
 
 			void SetHoverItem();
 
-			PointerHit *SelectHit();
+			PointerHit SelectHit(bool multi);
 
 			void Link();
 
@@ -40,7 +41,7 @@ namespace FlowChart
 
 			void DuplicateSymbol();
 
-			void ReadJSON(const winrt::hstring &text);
+			std::vector<ISymbolChart*> GetAllSymbols();
 		};
 	}
 }

@@ -52,9 +52,9 @@ namespace winrt::FlowChartWUI::implementation
         {
             for (uint8_t j = 1; j < _ROWS; j++)
             {
-                int r = (i == 1 || i == 2 || i == 7 || i == 8 || i == 9 || i == 10 || i == 15 || i == 16) ? j : 1;
-                int g = (i == 3 || i == 4 || i == 9 || i == 10 || i == 11 || i == 12 || i == 15 || i == 16) ? j : 1;
-                int b = (i == 5 || i == 6 || i == 11 || i == 12 || i == 13 || i == 14 || i == 15 || i == 16) ? j : 1;
+                uint8_t r = (i == 1 || i == 2 || i == 7 || i == 8 || i == 9 || i == 10 || i == 15 || i == 16) ? j : 1;
+                uint8_t g = (i == 3 || i == 4 || i == 9 || i == 10 || i == 11 || i == 12 || i == 15 || i == 16) ? j : 1;
+                uint8_t b = (i == 5 || i == 6 || i == 11 || i == 12 || i == 13 || i == 14 || i == 15 || i == 16) ? j : 1;
 
                 Color color;
                 color.A = 255;

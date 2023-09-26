@@ -11,6 +11,7 @@
 #include <map>
 #include <wingdi.h>
 #include <iomanip>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -22,6 +23,7 @@
 #include <winrt/Windows.ApplicationModel.Activation.h>
 #include <winrt/Windows.ApplicationModel.Core.h>
 #include <winrt/Windows.ApplicationModel.Resources.h>
+#include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.System.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Foundation.Collections.h>
@@ -52,4 +54,8 @@
 #include <winrt/Microsoft.UI.Input.h>
 #include <winrt/Microsoft.UI.Xaml.Input.h>
 #include <winrt/Microsoft.Windows.AppLifecycle.h>
+#include <winrt/Windows.Storage.Pickers.h>
+#include <Shobjidl.h>
+#include <shobjidl_core.h>
+#include <microsoft.ui.xaml.window.h>
 #include <wil/cppwinrt_helpers.h>

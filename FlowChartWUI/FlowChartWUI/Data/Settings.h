@@ -31,6 +31,9 @@
 #include "Link.h"
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 namespace FlowChart
 {
@@ -54,11 +57,15 @@ namespace FlowChart
 
 			static ISymbolClass* GetClassSymbol(int index);
 
-			static winrt::hstring GetJSON();
+			static winrt::hstring WriteJSON(std::vector<ISymbol*> symbols);
+
+			static std::vector<ISymbol*>  ReadJSON(const winrt::hstring& text);
 
 			static void DrawInputAnchors(Canvas canvas, ISymbol *symbol);
 
 			static void DrawOutputAnchors(Canvas canvas, ISymbol *symbol);
+
+			static ISymbol* GetSymbol(std::vector<ISymbol*> symbols, winrt::hstring name);
 
 			static winrt::hstring Display(const winrt::hstring &text, int maxlenght);
 		};

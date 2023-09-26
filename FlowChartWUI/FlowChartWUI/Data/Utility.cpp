@@ -87,6 +87,86 @@ namespace FlowChart
 				return L"";
 		}
 
+		winrt::hstring Utility::Trim(winrt::hstring text)
+		{
+			std::string strText = winrt::to_string(text);
+
+			while (strText[0] == ' ')
+			{
+				strText = strText.substr(1, strText.size() - 1);
+			}
+
+			while (strText[strText.size() - 1] == ' ')
+			{
+				strText = strText.substr(0, strText.size() - 1);
+			}
+
+			return winrt::to_hstring(strText);
+		}
+
+		winrt::hstring Utility::Replace(winrt::hstring text, winrt::hstring str1, winrt::hstring str2)
+		{
+			std::string strText = winrt::to_string(text);
+			std::string str_1 = winrt::to_string(str1);
+			std::string str_2 = winrt::to_string(str2);
+			size_t location = strText.find(str_1);
+			if (location < strText.size())
+			{
+				return winrt::to_hstring(strText.replace(location, str_1.length(), str_2));
+			}
+			return text;
+		}
+
+		std::vector<winrt::hstring> Utility::Split(winrt::hstring text, winrt::hstring split)
+		{
+			std::vector<winrt::hstring> result;
+
+			std::string strText = winrt::to_string(text);
+			std::string strSplit = winrt::to_string(split);
+			std::string str;
+			for (size_t i = 0; i < strText.size(); i++)
+			{
+				std::string s(new char[2] { strText[i], '\0' });
+				if (s == strSplit)
+				{
+					result.push_back(winrt::to_hstring(str));
+					str = "";
+				}
+				else
+				{
+					str.push_back(strText[i]);
+				}
+			}
+
+			result.push_back(winrt::to_hstring(str));
+
+			return result;
+		}
+
+		bool Utility::Contains(winrt::hstring str1, winrt::hstring str2)
+		{
+			std::string str_1 = winrt::to_string(str1);
+			std::string str_2 = winrt::to_string(str2);
+			if (str_1.find(str_2) < str_1.size())
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		bool Utility::EndsWith(winrt::hstring str1, winrt::hstring str2)
+		{
+			std::string str_1 = winrt::to_string(str1);
+			std::string str_2 = winrt::to_string(str2);
+			if (str_1.find(str_2) == str_1.size() - str_2.size())
+			{
+				return true;
+			}
+
+			return false;
+		}
+
 		BOOL CALLBACK Utility::EnumFontFamiliesExProcA(const ENUMLOGFONTEXA* lpelfe, const NEWTEXTMETRICEXA* lpntme, DWORD FontType, LPARAM lParam)
 		{
 			std::vector<winrt::hstring>* fonts = reinterpret_cast<std::vector<winrt::hstring>*>(lParam);

@@ -7,24 +7,24 @@ namespace FlowChart
 	{
 		DiagramClassSymbols::DiagramClassSymbols()
 		{
-			Symbols = std::vector<ISymbolClass*>();
+			symbols = std::vector<ISymbolClass*>();
 		}
 
 		void DiagramClassSymbols::Draw(Canvas canvas)
 		{
-			if (Utility::LinkItem >= 0 && Utility::LinkItem < Symbols.size() &&
-				Utility::LinkingIndex >= 0 && Utility::LinkingIndex < Symbols[Utility::LinkItem]->GetInputAnchorPoints().size())
+			if (Utility::LinkItem >= 0 && Utility::LinkItem < symbols.size() &&
+				Utility::LinkingIndex >= 0 && Utility::LinkingIndex < symbols[Utility::LinkItem]->GetInputAnchorPoints().size())
 			{
 				FlowChart::Data::Link* link = new FlowChart::Data::Link();
 				link->OutputAnchorIndex = Utility::LinkingIndex;
-				link->ParentSymbol = Symbols[Utility::LinkItem];
+				link->ParentSymbol = symbols[Utility::LinkItem];
 				link->DrawLinking(canvas);
 			}
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				Settings::DrawInputAnchors(canvas, (ISymbol*)Symbols[i]);
-				Symbols[i]->Draw(canvas);
-				Settings::DrawOutputAnchors(canvas, (ISymbol*)Symbols[i]);
+				Settings::DrawInputAnchors(canvas, (ISymbol*)symbols[i]);
+				symbols[i]->Draw(canvas);
+				Settings::DrawOutputAnchors(canvas, (ISymbol*)symbols[i]);
 			}
 			for (size_t j = 0; j < Settings::Links.size(); j++)
 			{
@@ -34,14 +34,14 @@ namespace FlowChart
 
 		void DiagramClassSymbols::SetHoverItem()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				Symbols[i]->setIsHover(Symbols[i]->IsHit());
+				symbols[i]->setIsHover(symbols[i]->IsHit());
 				for (size_t j = 0; j < Settings::Links.size(); j++)
 				{
 					if (Settings::Links[j] && Settings::Links[j]->ParentSymbol)
 					{
-						if (Settings::Links[j]->ParentSymbol->getName() == Symbols[i]->getName())
+						if (Settings::Links[j]->ParentSymbol->getName() == symbols[i]->getName())
 						{
 							Settings::Links[j]->IsHover = Settings::Links[j]->IsHit();
 						}
@@ -50,9 +50,9 @@ namespace FlowChart
 			}
 		}
 
-		FlowChart::Data::PointerHit *DiagramClassSymbols::SelectHit()
+		FlowChart::Data::PointerHit DiagramClassSymbols::SelectHit(bool multi)
 		{
-			PointerHit *result = new PointerHit();
+			PointerHit result;
 
 			Utility::SelectedAttributeIndex = -1;
 			Utility::SelectedOperationIndex = -1;
@@ -62,37 +62,39 @@ namespace FlowChart
 				Utility::LinkItem = -1;
 			}
 
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
 				if (Utility::LinkingIndex < 0)
 				{
-					int outputAnchorHit = Symbols[i]->OutputAnchorHit();
+					int outputAnchorHit = symbols[i]->OutputAnchorHit();
 					if (outputAnchorHit >= 0)
 					{
 						Utility::LinkingIndex = outputAnchorHit;
 						Utility::LinkItem = (int)i;
-						result->ItemIndex = outputAnchorHit;
-						result->Itemtype = Anchor;
+						result.ItemIndex = outputAnchorHit;
+						result.Itemtype = Anchor;
 					}
 				}
 
-				Symbols[i]->setIsSelected(Symbols[i]->IsHit());
+				bool select = multi && symbols[i]->getIsSelected();
 
-				if (Symbols[i]->getIsSelected())
+				symbols[i]->setIsSelected(symbols[i]->IsHit() || select);
+
+				if (symbols[i]->getIsSelected())
 				{
 					Utility::LinkItem = (int)i;
-					result->ItemIndex = (int)i;
-					if (result->SubItemIndex < 0)
+					result.ItemIndex = (int)i;
+					if (result.SubItemIndex < 0)
 					{
-						result->SubItemIndex = Symbols[i]->AttributeHit();
-						Utility::SelectedAttributeIndex = result->SubItemIndex;
+						result.SubItemIndex = symbols[i]->AttributeHit();
+						Utility::SelectedAttributeIndex = result.SubItemIndex;
 					}
-					if (result->SubItemIndex < 0)
+					if (result.SubItemIndex < 0)
 					{
-						result->SubItemIndex = Symbols[i]->OperationHit();
-						Utility::SelectedOperationIndex = result->SubItemIndex;
+						result.SubItemIndex = symbols[i]->OperationHit();
+						Utility::SelectedOperationIndex = result.SubItemIndex;
 					}
-					result->Itemtype = Symbol;
+					result.Itemtype = Symbol;
 				}
 
 				for (size_t j = 0; j < Settings::Links.size(); j++)
@@ -101,8 +103,8 @@ namespace FlowChart
 					//Settings::Links[j]->OutputAnchorIndex = (int)j;
 					if (Settings::Links[j]->IsSelected)
 					{
-						result->ItemIndex = (int)j;
-						result->Itemtype = ItemType::Linker;
+						result.ItemIndex = (int)j;
+						result.Itemtype = ItemType::Linker;
 					}
 				}
 			}
@@ -112,21 +114,21 @@ namespace FlowChart
 
 		void DiagramClassSymbols::Link()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->IsHit())
+				if (symbols[i]->IsHit())
 				{
-					if (Utility::LinkingIndex >= 0 && Utility::LinkingIndex < Symbols.size())
+					if (Utility::LinkingIndex >= 0 && Utility::LinkingIndex < symbols.size())
 					{
-						if (Utility::LinkItem >= 0 && Utility::LinkItem < Symbols.size())
+						if (Utility::LinkItem >= 0 && Utility::LinkItem < symbols.size())
 						{
 							if (Utility::LinkItem != i)
 							{
 								FlowChart::Data::Link* link = new FlowChart::Data::Link();
-								link->InputAnchorIndex = Symbols[i]->InputAnchorHit();
+								link->InputAnchorIndex = symbols[i]->InputAnchorHit();
 								link->OutputAnchorIndex = Utility::LinkingIndex;
-								link->ParentSymbol = Symbols[Utility::LinkItem];
-								link->NextSymbol = Symbols[i];
+								link->ParentSymbol = symbols[Utility::LinkItem];
+								link->NextSymbol = symbols[i];
 								Settings::Links.push_back(link);
 							}
 						}
@@ -137,29 +139,29 @@ namespace FlowChart
 
 		void DiagramClassSymbols::MoveSelection(float changeX, float changeY)
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
-					float x = Symbols[i]->GetPosition().X + changeX;
-					float y = Symbols[i]->GetPosition().Y + changeY;
-					Symbols[i]->SetPosition(x, y);
+					float x = symbols[i]->GetPosition().X + changeX;
+					float y = symbols[i]->GetPosition().Y + changeY;
+					symbols[i]->SetPosition(x, y);
 				}
 			}
 		}
 
 		void DiagramClassSymbols::AddSymbol(ISymbolClass *symbol)
 		{
-			Symbols.push_back(symbol);
+			symbols.push_back(symbol);
 		}
 
 		ISymbolClass* DiagramClassSymbols::GetSelection()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
-					return Symbols[i];
+					return symbols[i];
 				}
 			}
 			return 0;
@@ -167,10 +169,10 @@ namespace FlowChart
 
 		void DiagramClassSymbols::DeleteSelectedSymbol()
 		{
-			size_t count = Symbols.size();
+			size_t count = symbols.size();
 			for (size_t i = 0; i < count; i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
 					for (size_t j = 0; j < count; j++)
 					{
@@ -178,29 +180,29 @@ namespace FlowChart
 						{
 							if (Settings::Links[k] && Settings::Links[k]->NextSymbol)
 							{
-								if (Symbols[i]->getName() == Settings::Links[k]->NextSymbol->getName())
+								if (symbols[i]->getName() == Settings::Links[k]->NextSymbol->getName())
 								{
 									Settings::Links.erase(Settings::Links.begin() + k);
 								}
 							}
 						}
 					}
-					Symbols.erase(Symbols.begin() + i);
+					symbols.erase(symbols.begin() + i);
 				}
-				count = Symbols.size();
+				count = symbols.size();
 			}
 		}
 
 		void DiagramClassSymbols::DeleteSelectedLink()
 		{
 			//if a symbol is selected
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
 				for (size_t k = 0; k < Settings::Links.size(); k++)
 				{
 					if (Settings::Links[k] && Settings::Links[k]->NextSymbol)
 					{
-						if (Symbols[i]->getIsSelected())
+						if (symbols[i]->getIsSelected())
 						{
 							Settings::Links.erase(Settings::Links.begin() + k);
 						}
@@ -208,7 +210,7 @@ namespace FlowChart
 				}
 			}
 			//if a link is selected
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
 				for (size_t k = 0; k < Settings::Links.size(); k++)
 				{
@@ -225,114 +227,40 @@ namespace FlowChart
 
 		void DiagramClassSymbols::ClearSymbols()
 		{
-			Symbols.clear();
-		}
-
-		void DiagramClassSymbols::ReadJSON(const winrt::hstring &text)
-		{
-			/*
-			bool addingCmd = false;
-			for (winrt::hstring::const_iterator line = text.Split("\r\n"->ToCharArray(), StringSplitOptions::RemoveEmptyEntries).begin(); line != text.Split("\r\n"->ToCharArray(), StringSplitOptions::RemoveEmptyEntries).end(); ++line)
-			{
-				bool isSymbol = false;
-
-				if (Settings::ClassSymbols.empty())
-				{
-					Settings::InitializeSymbols();
-				}
-
-				for (std::vector<ISymbolClass*>::const_iterator cmd = Settings::ClassSymbols.begin(); cmd != Settings::ClassSymbols.end(); ++cmd)
-				{
-					if ((*line).Trim()->EndsWith((*cmd)->GetTypeString()))
-					{
-						Symbols.push_back(*cmd);
-						isSymbol = true;
-						break;
-					}
-				}
-
-				if (!isSymbol)
-				{
-					if ((*line).Trim()->Contains("Name:"))
-					{
-						if (addingCmd)
-						{
-							Symbols[Symbols.size() - 1]->setName((*line).Replace("Name:", "")->Trim());
-						}
-					}
-					else if ((*line).Trim()->Contains("Caption:"))
-					{
-						if (addingCmd)
-						{
-							Symbols[Symbols.size() - 1]->setCaption((*line).Replace("Caption:", "")->Trim());
-						}
-					}
-					else if ((*line).Trim()->Contains("Position:"))
-					{
-						try
-						{
-							winrt::hstring strPos = (*line).Replace("Position:", "")->Trim();
-							winrt::hstring *pos = strPos.Split((winrt::hstring(" "))->ToCharArray(), StringSplitOptions::RemoveEmptyEntries);
-							if (sizeof(pos) / sizeof(pos[0]) >= 2)
-							{
-								Symbols[Symbols.size() - 1]->SetPosition(StringConverterHelper::fromString<int>(pos[0]), StringConverterHelper::fromString<int>(pos[1]));
-							}
-						}
-						catch (...)
-						{
-
-						}
-					}
-					else if ((*line).Trim()->Contains("Next:"))
-					{
-						//SymbolClass tempCmd = new Symbol();
-						//tempCmd.Name = line.Replace("Next:", "").Trim();
-						//tempCmd.Caption = string.Empty;
-						//ClassSymbols[ClassSymbols.Count - 1].SetNextSymbol(tempCmd);
-					}
-					else if ((*line).Trim()->Contains("Next2:"))
-					{
-						//SymbolClass tempCmd = new Symbol();
-						//tempCmd.Name = line.Replace("Next2:", "").Trim();
-						//tempCmd.Caption = string.Empty;
-						//ClassSymbols[ClassSymbols.Count - 1].SetNextSymbols(new List<SymbolClass>() { tempCmd });
-					}
-				}
-			}
-			*/
+			symbols.clear();
 		}
 
 		void DiagramClassSymbols::AddAttribute()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
-					winrt::hstring strNum = winrt::to_hstring(Symbols[i]->GetAttributeCount());
-					Symbols[i]->AddAttribute(ItemProperty(L"attribute" + strNum, L"attribute" + strNum, L"", PropertyType::Void, Public, std::vector<winrt::hstring>()));
+					winrt::hstring strNum = winrt::to_hstring(symbols[i]->GetAttributeCount());
+					symbols[i]->AddAttribute(ItemProperty(L"attribute" + strNum, L"attribute" + strNum, L"", PropertyType::Void, Public, std::vector<winrt::hstring>()));
 				}
 			}
 		}
 
 		void DiagramClassSymbols::AddOperation()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
-					winrt::hstring strNum = winrt::to_hstring(Symbols[i]->GetOperationCount());
-					Symbols[i]->AddOperation(ItemProperty(L"operation" + strNum, L"operation" + strNum, L"", PropertyType::Void, Public, std::vector<winrt::hstring>()));
+					winrt::hstring strNum = winrt::to_hstring(symbols[i]->GetOperationCount());
+					symbols[i]->AddOperation(ItemProperty(L"operation" + strNum, L"operation" + strNum, L"", PropertyType::Void, Public, std::vector<winrt::hstring>()));
 				}
 			}
 		}
 
 		void DiagramClassSymbols::DuplicateSymbol()
 		{
-			for (size_t i = 0; i < Symbols.size(); i++)
+			for (size_t i = 0; i < symbols.size(); i++)
 			{
-				if (Symbols[i]->getIsSelected())
+				if (symbols[i]->getIsSelected())
 				{
-					Symbols.push_back(Symbols[i]->GetDuplicate());
+					symbols.push_back(symbols[i]->GetDuplicate());
 				}
 			}
 		}

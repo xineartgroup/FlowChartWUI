@@ -210,6 +210,18 @@ namespace winrt::FlowChartWUI::implementation
                         ::winrt::get_self<D>(t)->pictureBox1_DoubleTapped(p0, p1);
                     }
                 });
+                targetElement.KeyDown([weakThis](::winrt::Windows::Foundation::IInspectable const& p0, ::winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& p1){
+                    if (auto t = weakThis.get())
+                    {
+                        ::winrt::get_self<D>(t)->canvas_KeyDown(p0, p1);
+                    }
+                });
+                targetElement.KeyUp([weakThis](::winrt::Windows::Foundation::IInspectable const& p0, ::winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& p1){
+                    if (auto t = weakThis.get())
+                    {
+                        ::winrt::get_self<D>(t)->canvas_KeyUp(p0, p1);
+                    }
+                });
             }
             break;
         case 20:
@@ -366,6 +378,25 @@ namespace winrt::FlowChartWUI::implementation
             break;
         case 33:
             {
+                auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::Button>();
+                this->btnMultiSelect(targetElement);
+                auto weakThis = ::winrt::make_weak<class_type>(*this);
+                targetElement.Click([weakThis](::winrt::Windows::Foundation::IInspectable const& p0, ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const& p1){
+                    if (auto t = weakThis.get())
+                    {
+                        ::winrt::get_self<D>(t)->btnMultiSelect_Click(p0, p1);
+                    }
+                });
+            }
+            break;
+        case 34:
+            {
+                auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::Image>();
+                this->image2(targetElement);
+            }
+            break;
+        case 35:
+            {
                 auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem>();
                 auto weakThis = ::winrt::make_weak<class_type>(*this);
                 targetElement.Click([weakThis](::winrt::Windows::Foundation::IInspectable const& p0, ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const& p1){
@@ -376,7 +407,7 @@ namespace winrt::FlowChartWUI::implementation
                 });
             }
             break;
-        case 34:
+        case 36:
             {
                 auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem>();
                 auto weakThis = ::winrt::make_weak<class_type>(*this);
@@ -388,7 +419,7 @@ namespace winrt::FlowChartWUI::implementation
                 });
             }
             break;
-        case 35:
+        case 37:
             {
                 auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem>();
                 auto weakThis = ::winrt::make_weak<class_type>(*this);
@@ -400,7 +431,7 @@ namespace winrt::FlowChartWUI::implementation
                 });
             }
             break;
-        case 36:
+        case 38:
             {
                 auto targetElement = target.as<::winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem>();
                 auto weakThis = ::winrt::make_weak<class_type>(*this);

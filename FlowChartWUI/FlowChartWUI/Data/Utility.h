@@ -44,6 +44,16 @@ namespace FlowChart
 			
 			static winrt::hstring GetPropertyString(PropertyType propertyVisibility);
 
+			static winrt::hstring Trim(winrt::hstring text);
+
+			static winrt::hstring Replace(winrt::hstring text, winrt::hstring str1, winrt::hstring str2);
+
+			static std::vector<winrt::hstring> Split(winrt::hstring strText, winrt::hstring strSplit);
+
+			static bool Contains(winrt::hstring str1, winrt::hstring str2);
+
+			static bool EndsWith(winrt::hstring str1, winrt::hstring str2);
+
 			static BOOL CALLBACK EnumFontFamiliesExProcA(const ENUMLOGFONTEXA* lpelfe, const NEWTEXTMETRICEXA* lpntme, DWORD FontType, LPARAM lParam);
 		};
 	}

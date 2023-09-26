@@ -145,7 +145,7 @@ namespace FlowChart
 				float offsetY = GetPosition().Y + headHeight + (bodyHeight * i);
 				if (Utility::MousePosition.X >= GetPosition().X && Utility::MousePosition.X <= GetPosition().X + GetWidth() && Utility::MousePosition.Y >= offsetY && Utility::MousePosition.Y <= offsetY + bodyHeight)
 				{
-					return i;
+					return (int)i;
 				}
 			}
 			return -1;
