@@ -87,6 +87,10 @@ namespace FlowChart
 					s["IsSelected"] = symbol->getIsSelected();
 					winrt::Windows::Foundation::Point position = symbol->GetPosition();
 					s["Position"] = std::to_string((int)position.X) + "," + std::to_string((int)position.Y);
+					for (int i = 0; i < symbol->GetPropertyCount(); i++)
+					{
+						s["Property_" + std::to_string(i)] = winrt::to_string(symbol->GetProperty(i).getValue());
+					}
 					j.push_back(s);
 				}
 
@@ -160,6 +164,12 @@ namespace FlowChart
 									if (pos.size() >= 2)
 									{
 										symbol->SetPosition(std::stof(winrt::to_string(pos[0])), std::stof(winrt::to_string(pos[1])));
+									}
+									for (int i = 0; i < symbol->GetPropertyCount(); i++)
+									{
+										ItemProperty itmProp = symbol->GetProperty(i);
+										itmProp.setValue(winrt::to_hstring(s["Property_" + std::to_string(i)]));
+										symbol->SetProperty(i, itmProp);
 									}
 									symbols.push_back(symbol);
 									break;
